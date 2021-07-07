@@ -3,6 +3,7 @@ package com.personality.di.component
 import android.app.Application
 import com.personality.di.PersonalityApp
 import com.personality.di.module.PersonalityAppModule
+import com.personality.di.module.RepoModule
 import com.personality.di.module.ViewModelFactoryBuilder
 import dagger.BindsInstance
 import dagger.Component
@@ -15,7 +16,8 @@ import javax.inject.Singleton
     modules = [
         AndroidSupportInjectionModule::class,
         ViewModelFactoryBuilder::class,
-        PersonalityAppModule::class
+        PersonalityAppModule::class,
+        RepoModule::class
     ]
 )
 internal interface PersonalityComponent : AndroidInjector<PersonalityApp> {
