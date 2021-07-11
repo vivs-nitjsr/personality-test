@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Personality Test</string>
+    <string name="submit">SUBMIT</string>
+    <string name="select_choice">Please select a choice</string>
+    <string name="next">NEXT</string>
 </resources>

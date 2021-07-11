@@ -1,9 +1,7 @@
 package com.personality.di.module
 
 import android.app.Application
-import com.personality.core.AssetFileLoader
-import com.personality.core.AssetFileLoaderImpl
-import com.personality.core.JsonParser
+import com.personality.core.*
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -19,7 +17,15 @@ internal class PersonalityAppModule {
 
     @Provides
     @Singleton
-    fun providesJsonParser() : JsonParser {
+    fun providesJsonParser(): JsonParser {
         return JsonParser()
     }
+
+    @Provides
+    @Singleton
+    fun providesStringLocalizer(application: Application): StringLocalizer =
+        StringLocalizerImpl(application)
+
+    @Provides
+    fun providesToaster(application: Application): Toaster = AndroidToaster(application)
 }

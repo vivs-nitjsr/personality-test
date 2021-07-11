@@ -11,7 +11,9 @@ import com.personality.R
 import com.personality.core.observe
 import com.personality.core.withViewModel
 import com.personality.di.PersonalityApp
-import com.personality.presentation.categories.QuestionCategoryAdapter
+import com.personality.domain.model.Question
+import com.personality.presentation.QuestionView
+import com.personality.presentation.adapter.QuestionCategoryAdapter
 import com.personality.presentation.viewmodel.PersonalityViewModel
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
@@ -28,17 +30,41 @@ internal class PersonalityTestFragment : Fragment(), HasAndroidInjector {
     private val viewModel: PersonalityViewModel by lazy {
         withViewModel(viewModelFactory) {
             observeCategoriesViewState()
+            observeQuestionViewState()
+            observeSubmitViewState()
         }
     }
 
-    private val categoriesAdapter = QuestionCategoryAdapter()
+    private val categoriesAdapter = QuestionCategoryAdapter {
+        viewModel.onCategorySelected(it)
+    }
 
     private fun PersonalityViewModel.observeCategoriesViewState() {
         observe(categoriesViewState) { updateCategories(it) }
     }
 
+    private fun PersonalityViewModel.observeQuestionViewState() {
+        observe(questionViewState) { updateQuestion(it) }
+    }
+
+    private fun PersonalityViewModel.observeSubmitViewState() {
+        observe(submitViewState) { questionView.shouldShowSubmitButton(it) }
+    }
+
     private fun updateCategories(categories: List<String>) {
         categoriesAdapter.update(categories)
+    }
+
+    private lateinit var questionView: QuestionView
+
+    private fun updateQuestion(question: Question) {
+        with(questionView) {
+            updateQuestion(question)
+            setOnSubmitListener(
+                submitClicked = { viewModel.onSubmitClicked(question, it) },
+                onError = { viewModel.onError() }
+            )
+        }
     }
 
     @Inject
@@ -62,6 +88,8 @@ internal class PersonalityTestFragment : Fragment(), HasAndroidInjector {
     private fun initViews(view: View) {
         val categoriesRecyclerView = view.findViewById<RecyclerView>(R.id.categoriesRecyclerView)
         categoriesRecyclerView.adapter = categoriesAdapter
+
+        questionView = view.findViewById(R.id.questionView)
     }
 
     override fun androidInjector() = dispatchingAndroidInjector

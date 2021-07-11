@@ -1,4 +1,4 @@
-package com.personality.presentation.categories
+package com.personality.presentation.adapter
 
 import android.view.LayoutInflater
 import android.view.View
@@ -9,7 +9,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.personality.R
 import kotlinx.android.extensions.LayoutContainer
 
-internal class QuestionCategoryAdapter : RecyclerView.Adapter<QuestionCategoryViewHolder>() {
+internal class QuestionCategoryAdapter(
+    private val categoryClicked: (String) -> Unit
+) : RecyclerView.Adapter<QuestionCategoryViewHolder>() {
 
     private val categories = mutableListOf<String>()
 
@@ -22,9 +24,15 @@ internal class QuestionCategoryAdapter : RecyclerView.Adapter<QuestionCategoryVi
 
     override fun onBindViewHolder(holder: QuestionCategoryViewHolder, position: Int) {
         holder.bindView(categories[position], selectedIndex == position)
+        holder.containerView.setOnClickListener { onCategorySelected(position) }
     }
 
     override fun getItemCount() = categories.size
+
+    private fun onCategorySelected(position: Int) {
+        updateSelection(position)
+        categoryClicked(categories[position])
+    }
 
     fun updateSelection(position: Int) {
         selectedIndex = position
