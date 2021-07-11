@@ -1,19 +1,22 @@
 package com.personality.presentation
 
 import android.content.Context
+import android.os.Build
 import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.Group
-import androidx.core.view.children
 import androidx.core.view.get
 import androidx.core.view.isVisible
 import com.personality.R
 import com.personality.domain.model.Question
+import com.personality.domain.model.Range
 
+@RequiresApi(Build.VERSION_CODES.O)
 internal class QuestionView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -54,12 +57,16 @@ internal class QuestionView @JvmOverloads constructor(
     }
 
     private fun loadSingleChoiceQuestion(question: Question) {
-        loadRadioGroup(answerGroup, question.questionType.options) {
-            if (question.questionType.type == "single_choice_conditional") {
-                if (question.questionType.condition?.predicate?.exactEquals?.contains(it) == true) {
-                    inflateConditions(question.questionType.condition.ifPositive)
-                } else {
-                    removeConditions()
+        if (question.questionType.type == "number_range") {
+            loadSeekBar(answerGroup, question.questionType.range)
+        } else {
+            loadRadioGroup(answerGroup, question.questionType.options) {
+                if (question.questionType.type == "single_choice_conditional") {
+                    if (question.questionType.condition?.predicate?.exactEquals?.contains(it) == true) {
+                        inflateConditions(question.questionType.condition.ifPositive)
+                    } else {
+                        removeConditions()
+                    }
                 }
             }
         }
@@ -69,13 +76,47 @@ internal class QuestionView @JvmOverloads constructor(
         conditionGroup.isVisible = true
 
         conditionTitle.text = question.question
-        loadRadioGroup(radioGroupCondition, question.questionType.options) {
-            // TODO: Save condition as answer
+        if (question.questionType.type == "number_range") {
+            loadSeekBar(radioGroupCondition, question.questionType.range)
+        } else {
+            loadRadioGroup(radioGroupCondition, question.questionType.options) {
+                // TODO: Save condition as answer
+            }
         }
     }
 
     private fun removeConditions() {
         conditionGroup.isVisible = false
+    }
+
+    private fun loadSeekBar(parent: ViewGroup, range: Range?) {
+        if (range == null) return
+
+        val view = LayoutInflater.from(context).inflate(R.layout.view_question_range, null)
+        val seekBarProgress = view.findViewById<TextView>(R.id.seekBarProgress)
+
+        view.findViewById<TextView>(R.id.minTextView).text = range.from
+        view.findViewById<TextView>(R.id.maxTextView).text = range.to
+        seekBarProgress.text = range.from
+
+        view.findViewById<SeekBar>(R.id.seekBar).apply {
+            min = range.from.toInt()
+            max = range.to.toInt()
+            progress = range.from.toInt()
+            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(
+                    seekBar: SeekBar?, progress: Int, fromUser: Boolean
+                ) {
+                    seekBarProgress.text = progress.toString()
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) = Unit
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) = Unit
+            })
+        }
+
+        parent.addView(view)
     }
 
     private fun loadRadioGroup(
