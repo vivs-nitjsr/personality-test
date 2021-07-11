@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.AppCompatTextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/categoryTextView"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="@dimen/d1"
+    android:background="@drawable/shape_chip_selected"
+    android:gravity="center"
+    android:paddingStart="@dimen/d2"
+    android:paddingTop="@dimen/d0_half"
+    android:paddingEnd="@dimen/d2"
+    android:paddingBottom="@dimen/d0_half"
+    android:textColor="@color/white"
+    tools:text="Hard fact" />

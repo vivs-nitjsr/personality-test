@@ -50,5 +50,5 @@ internal class RemoteRepositoryImpl constructor(
         return questionsList
     }
 
-    private fun getJsonString() = assetFileLoader.loadFileAsStream("personality_test")
+    private fun getJsonString() = assetFileLoader.loadFileAsStream("personality_test.json")
 }

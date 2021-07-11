@@ -2,9 +2,7 @@ package com.personality.di.component
 
 import android.app.Application
 import com.personality.di.PersonalityApp
-import com.personality.di.module.PersonalityAppModule
-import com.personality.di.module.RepoModule
-import com.personality.di.module.ViewModelFactoryBuilder
+import com.personality.di.module.*
 import dagger.BindsInstance
 import dagger.Component
 import dagger.android.AndroidInjector
@@ -16,6 +14,8 @@ import javax.inject.Singleton
     modules = [
         AndroidSupportInjectionModule::class,
         ViewModelFactoryBuilder::class,
+        ActivityModule::class,
+        FragmentModule::class,
         PersonalityAppModule::class,
         RepoModule::class
     ]
