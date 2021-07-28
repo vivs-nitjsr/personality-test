@@ -129,4 +129,57 @@ internal class PersonalityViewModelTest {
         assertEquals(question2, viewModel.questionViewState.value)
 
     }
+
+    @Test
+    fun `verify previous button click goes to previous question`() {
+        whenever(categoriesUseCase.run()).doReturn(Observable.just(listOf("category1")))
+        whenever(getQuestionsUseCase.run("category1")).doReturn(Observable.just(questionsList))
+
+        viewModel.init()
+        viewModel.onNextClicked(TEST_ANSWER)
+
+        viewModel.onPreviousClicked()
+        assertEquals(question1, viewModel.questionViewState.value)
+    }
+
+    @Test
+    fun `verify previous button clicked on first question then category is changed and last question is selected`() {
+        whenever(categoriesUseCase.run()).doReturn(
+            Observable.just(
+                listOf(
+                    "category1",
+                    "category2"
+                )
+            )
+        )
+        whenever(getQuestionsUseCase.run(anyString())).doReturn(Observable.just(questionsList))
+
+        viewModel.init()
+        viewModel.onNextClicked(TEST_ANSWER)
+        viewModel.onNextClicked(TEST_ANSWER).also {
+            assertEquals("category2", viewModel.categoryViewState.value)
+            assertEquals(question1, viewModel.questionViewState.value)
+        }
+
+        viewModel.onPreviousClicked()
+        assertEquals("category1", viewModel.categoryViewState.value)
+        assertEquals(question2, viewModel.questionViewState.value)
+    }
+
+    @Test
+    fun `verify previous button clicked on first question question is not changed`() {
+        whenever(categoriesUseCase.run()).doReturn(
+            Observable.just(
+                listOf(
+                    "category1",
+                )
+            )
+        )
+        whenever(getQuestionsUseCase.run(anyString())).doReturn(Observable.just(questionsList))
+
+        viewModel.init()
+
+        viewModel.onPreviousClicked()
+        assertEquals(question1, viewModel.questionViewState.value)
+    }
 }
