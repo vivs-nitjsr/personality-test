@@ -36,8 +36,8 @@ internal class PersonalityViewModel @Inject constructor(
     val submitViewState: LiveData<Boolean>
         get() = submitState
 
-    private val categoryState= MutableLiveData<String>()
-    val categoryViewState : LiveData<String> get() = categoryState
+    private val categoryState = MutableLiveData<String>()
+    val categoryViewState: LiveData<String> get() = categoryState
 
     private var selectedCategory = ""
 
@@ -68,33 +68,36 @@ internal class PersonalityViewModel @Inject constructor(
         }
     }
 
-    private fun getQuestionsByCategories(category: String) {
+    private fun getQuestionsByCategories(category: String, reverse: Boolean = false) {
         getQuestionsUseCase.run(category)
             .doOnSubscribe { showLoading() }
             .doAfterTerminate { hideLoading() }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                { handleQuestionListSuccess(it) },
+                { handleQuestionListSuccess(it, reverse) },
                 ::handleQuestionListFailure
             ).disposedBy(disposeBag)
     }
 
-    fun onCategorySelected(category: String) {
-        getQuestionsByCategories(category)
+    fun onCategorySelected(category: String, reverse: Boolean = false) {
+        getQuestionsByCategories(category, reverse)
     }
 
-    private fun handleQuestionListSuccess(questions: List<Question>) {
+    private fun handleQuestionListSuccess(questions: List<Question>, reverse: Boolean = false) {
         this.questions.clear()
         this.questions.addAll(questions)
-        resetQuestionView()
+        selectedQuestion = if (reverse) {
+            this.questions.size - 1
+        } else {
+            0
+        }
+        submitState.value = false
 
         loadQuestion()
     }
 
-    private fun resetQuestionView() {
-        selectedQuestion = 0
-        submitState.value = false
-    }
+    private fun findNextUnansweredQuestion() =
+        this.questions.indexOfFirst { solutionMap[it] == null }
 
     private fun loadQuestion() {
         questionState.value = questions[selectedQuestion]
@@ -150,7 +153,18 @@ internal class PersonalityViewModel @Inject constructor(
     }
 
     fun onPreviousClicked() {
-
+        selectedQuestion--
+        if (selectedQuestion >= 0) {
+            loadQuestion()
+        } else {
+            categoryIndex--
+            val category = categoriesState.value
+            if (category != null && categoryIndex >= 0) {
+                selectedCategory = category[categoryIndex]
+                categoryState.value = selectedCategory
+                onCategorySelected(selectedCategory, reverse = true)
+            }
+        }
     }
 
     fun onError() {
