@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
@@ -31,9 +32,14 @@ internal class PersonalityTestFragment : Fragment(), HasAndroidInjector {
         withViewModel(viewModelFactory) {
             observeCategoriesViewState()
             observeQuestionViewState()
-            observeSubmitViewState()
+            observeCategoryViewState()
+           // observeSubmitViewState()
         }
     }
+
+    private lateinit var nextButton: Button
+    private lateinit var previousButton: Button
+    private lateinit var submitButton: Button
 
     private val categoriesAdapter = QuestionCategoryAdapter {
         viewModel.onCategorySelected(it)
@@ -47,12 +53,14 @@ internal class PersonalityTestFragment : Fragment(), HasAndroidInjector {
         observe(questionViewState) { updateQuestion(it) }
     }
 
-    private fun PersonalityViewModel.observeSubmitViewState() {
-        observe(submitViewState) { questionView.shouldShowSubmitButton(it) }
-    }
-
     private fun updateCategories(categories: List<String>) {
         categoriesAdapter.update(categories)
+    }
+
+    private fun PersonalityViewModel.observeCategoryViewState() {
+        observe(categoryViewState) {
+            categoriesAdapter.updateSelection(it)
+        }
     }
 
     private lateinit var questionView: QuestionView
@@ -60,10 +68,6 @@ internal class PersonalityTestFragment : Fragment(), HasAndroidInjector {
     private fun updateQuestion(question: Question) {
         with(questionView) {
             updateQuestion(question)
-            setOnSubmitListener(
-                submitClicked = { viewModel.onSubmitClicked(question, it) },
-                onError = { viewModel.onError() }
-            )
         }
     }
 
@@ -90,6 +94,17 @@ internal class PersonalityTestFragment : Fragment(), HasAndroidInjector {
         categoriesRecyclerView.adapter = categoriesAdapter
 
         questionView = view.findViewById(R.id.questionView)
+
+        nextButton = view.findViewById(R.id.nextButton)
+        previousButton = view.findViewById(R.id.previousButton)
+        submitButton = view.findViewById(R.id.submitButton)
+
+        applyClickListeners()
+    }
+
+    private fun applyClickListeners() {
+        previousButton.setOnClickListener { viewModel.onPreviousClicked() }
+        nextButton.setOnClickListener { viewModel.onNextClicked(questionView.getAnswer()) }
     }
 
     override fun androidInjector() = dispatchingAndroidInjector

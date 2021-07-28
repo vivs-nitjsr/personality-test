@@ -39,6 +39,11 @@ internal class QuestionCategoryAdapter(
         notifyDataSetChanged()
     }
 
+    fun updateSelection(category: String) {
+        selectedIndex = categories.indexOf(category)
+        notifyDataSetChanged()
+    }
+
     fun update(categories: List<String>) {
         this.categories.clear()
         this.categories.addAll(categories)

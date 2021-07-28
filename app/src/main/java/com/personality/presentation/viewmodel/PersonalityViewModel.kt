@@ -7,6 +7,7 @@ import com.personality.R
 import com.personality.core.StringLocalizer
 import com.personality.core.Toaster
 import com.personality.core.disposedBy
+import com.personality.domain.model.Answer
 import com.personality.domain.model.Question
 import com.personality.domain.usecase.GetCategoriesUseCase
 import com.personality.domain.usecase.GetQuestionsUseCase
@@ -35,14 +36,21 @@ internal class PersonalityViewModel @Inject constructor(
     val submitViewState: LiveData<Boolean>
         get() = submitState
 
+    private val categoryState= MutableLiveData<String>()
+    val categoryViewState : LiveData<String> get() = categoryState
+
     private var selectedCategory = ""
 
     private val questions = mutableListOf<Question>()
     private var selectedQuestion = 0
 
+    private var categoryIndex = 0
+
     fun init() {
         getCategories()
     }
+
+    private val solutionMap: MutableMap<Question, Answer> = mutableMapOf()
 
     private fun getCategories() {
         categoriesUseCase.run()
@@ -53,7 +61,7 @@ internal class PersonalityViewModel @Inject constructor(
 
     private fun handleSuccess(categories: List<String>) {
         if (categories.isNotEmpty()) {
-            selectedCategory = categories[0]
+            selectedCategory = categories[categoryIndex]
             categoriesState.value = categories
 
             getQuestionsByCategories(selectedCategory)
@@ -111,16 +119,38 @@ internal class PersonalityViewModel @Inject constructor(
         super.onCleared()
     }
 
-    fun onSubmitClicked(question: Question, answer: Int) {
-        // TODO: Selection persistence
-        if (selectedQuestion < questions.size) {
-            selectedQuestion++
-            val isLastQuestion = selectedQuestion >= questions.size - 1
-            submitState.value = isLastQuestion
-            if (selectedQuestion < questions.size) {
-                loadQuestion()
-            }
+    fun onNextClicked(answer: Int?) {
+        if (answer == null || questionState.value == null) {
+            onError()
+
+            return
         }
+
+        val question = questionState.value!!
+        solutionMap[question] = Answer(answer.toString())
+
+        selectedQuestion++
+
+        if (selectedQuestion < questions.size) {
+            loadQuestion()
+        } else {
+            selectNextCategory()
+        }
+    }
+
+    private fun selectNextCategory() {
+        selectedQuestion = 0
+        categoryIndex++
+        val category = categoriesState.value
+        if (category != null && categoryIndex < category.size) {
+            selectedCategory = category[categoryIndex]
+            categoryState.value = selectedCategory
+            onCategorySelected(selectedCategory)
+        }
+    }
+
+    fun onPreviousClicked() {
+
     }
 
     fun onError() {

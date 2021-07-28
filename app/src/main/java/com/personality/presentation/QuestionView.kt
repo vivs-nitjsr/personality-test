@@ -29,22 +29,19 @@ internal class QuestionView @JvmOverloads constructor(
 
     private val answerGroup by lazy { findViewById<LinearLayout>(R.id.answerGroup) }
     private val questionTitle by lazy { findViewById<TextView>(R.id.questionTitle) }
-    private val submitButton by lazy { findViewById<Button>(R.id.submitButton) }
     private val conditionGroup by lazy { findViewById<Group>(R.id.conditionGroup) }
     private val radioGroupCondition by lazy { findViewById<LinearLayout>(R.id.radioGroupCondition) }
     private val conditionTitle by lazy { findViewById<TextView>(R.id.conditionTitle) }
 
-    fun setOnSubmitListener(submitClicked: (Int) -> Unit, onError: () -> Unit) {
-        findViewById<Button>(R.id.submitButton).setOnClickListener {
-            val radioGroup = answerGroup.findViewById<RadioGroup>(R.id.radioGroup)
-            if (radioGroup != null) {
-                if (radioGroup.isVisible && radioGroup.checkedRadioButtonId >= 0) {
-                    submitClicked(radioGroup.checkedRadioButtonId)
-                } else {
-                    onError()
-                }
+    fun getAnswer(): Int? {
+        val radioGroup = answerGroup.findViewById<RadioGroup>(R.id.radioGroup)
+        if (radioGroup != null) {
+            if (radioGroup.isVisible && radioGroup.checkedRadioButtonId >= 0) {
+                return radioGroup.checkedRadioButtonId
             }
         }
+
+        return null
     }
 
     fun updateQuestion(question: Question) {
@@ -147,14 +144,5 @@ internal class QuestionView @JvmOverloads constructor(
             Log.d("Vivek", selected.toString())
             choiceClicked(selected.toString())
         }
-    }
-
-    fun shouldShowSubmitButton(submit: Boolean) {
-        submitButton.text =
-            if (submit) {
-                context.getString(R.string.submit)
-            } else {
-                context.getString(R.string.next)
-            }
     }
 }

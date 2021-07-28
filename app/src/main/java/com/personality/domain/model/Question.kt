@@ -26,3 +26,8 @@ internal data class Condition(
 internal data class Predicate(
     val exactEquals: List<String>
 )
+
+internal data class Answer(
+    val selection: String,
+    val secondOption: String? = null
+)
